@@ -5,8 +5,8 @@ import sqlite3
 
 # --- CONFIGURATION: Set Product/Store to test ---
 # <<< CHANGE THESE to valid IDs from your data >>>
-TEST_PRODUCT_ID = '5406'
-TEST_STORE_ID = '67'
+TEST_PRODUCT_ID = '9286'
+TEST_STORE_ID = '16'
 FORECAST_DAYS = 7
 
 if __name__ == "__main__":

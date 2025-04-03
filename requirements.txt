@@ -1,0 +1,6 @@
+flask
+sqlite3
+langchain-ollama
+selenium
+beautifulsoup4
+fake-useragent

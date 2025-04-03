@@ -1,0 +1,23 @@
+[project]
+name = "retailagentoptyaml"
+version = "0.1.0"
+description = "RetailAgentOptYAML using crewAI"
+authors = [{ name = "Your Name", email = "you@example.com" }]
+requires-python = ">=3.10,<3.13"
+dependencies = [
+    "crewai[tools]>=0.108.0,<1.0.0"
+]
+
+[project.scripts]
+retailagentoptyaml = "retailagentoptyaml.main:run"
+run_crew = "retailagentoptyaml.main:run"
+train = "retailagentoptyaml.main:train"
+replay = "retailagentoptyaml.main:replay"
+test = "retailagentoptyaml.main:test"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.crewai]
+type = "crew"

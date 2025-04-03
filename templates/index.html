@@ -1,0 +1,35 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retail Inventory Optimizer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Retail Inventory Optimizer</h1>
+        <form id="inputForm">
+            <label for="product_id">Product ID:</label>
+            <input type="text" id="product_id" name="product_id" value="9286" required>
+            <label for="store_id">Store ID:</label>
+            <input type="text" id="store_id" name="store_id" value="16" required>
+            <label for="forecast_horizon_days">Forecast Horizon (Days):</label>
+            <input type="number" id="forecast_horizon_days" name="forecast_horizon_days" value="7" min="1" required>
+            <button type="submit">Submit</button>
+        </form>
+        <div id="results">
+            <h2>Results</h2>
+            <p><strong>Demand Forecast:</strong> <span id="demand_forecast"></span></p>
+            <p><strong>Inventory Status:</strong> <span id="inventory_status"></span></p>
+            <p><strong>Pricing Recommendation:</strong> <span id="pricing_recommendation"></span></p>
+            <p><strong>Final Price:</strong> <span id="final_price"></span></p>
+            <p><strong>Final Discount:</strong> <span id="final_discount"></span></p>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <canvas id="demandChart" width="400" height="200"></canvas>
+</body>
+</html>
