@@ -1,60 +1,57 @@
 /* static/css/style.css */
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    margin: 0;
-    padding: 0;
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-.container {
-    max-width: 800px;
-    margin: 20px auto;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 
-h1 {
-    text-align: center;
-    color: #333;
+@keyframes bounce-slow {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
 }
 
-form {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+.fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
 }
 
-label {
-    font-weight: bold;
+.spin {
+    animation: spin 1s linear infinite;
 }
 
-input, button {
-    padding: 8px;
-    margin-bottom: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+.animate-bounce-slow {
+    animation: bounce-slow 2s infinite;
 }
 
-button {
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    cursor: pointer;
+.bg-gradient-custom {
+    background: linear-gradient(135deg, #1e3c72, #4a2a8a);
 }
 
-button:hover {
-    background-color: #45a049;
+.glass-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
 }
 
-#results {
-    margin-top: 20px;
-    padding: 10px;
-    background-color: #f9f9f9;
-    border-radius: 4px;
+.result-card {
+    background: rgba(255, 255, 255, 0.15);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-#results p {
-    margin: 5px 0;
+.result-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.font-orbitron {
+    font-family: 'Orbitron', sans-serif;
+}
+
+/* Enhanced loading message styling */
+#loadingMessage {
+    animation: fadeIn 0.5s infinite alternate;
 }

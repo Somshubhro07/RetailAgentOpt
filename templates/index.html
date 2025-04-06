@@ -1,35 +1,171 @@
-<!-- templates/index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Retail Inventory Optimizer</title>
+    <title>Retail AI Dashboard</title>
+    <script src="https://cdn.tailwindcss.com/3.4.10"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
 </head>
-<body>
-    <div class="container">
-        <h1>Retail Inventory Optimizer</h1>
-        <form id="inputForm">
-            <label for="product_id">Product ID:</label>
-            <input type="text" id="product_id" name="product_id" value="9286" required>
-            <label for="store_id">Store ID:</label>
-            <input type="text" id="store_id" name="store_id" value="16" required>
-            <label for="forecast_horizon_days">Forecast Horizon (Days):</label>
-            <input type="number" id="forecast_horizon_days" name="forecast_horizon_days" value="7" min="1" required>
-            <button type="submit">Submit</button>
-        </form>
-        <div id="results">
-            <h2>Results</h2>
-            <p><strong>Demand Forecast:</strong> <span id="demand_forecast"></span></p>
-            <p><strong>Inventory Status:</strong> <span id="inventory_status"></span></p>
-            <p><strong>Pricing Recommendation:</strong> <span id="pricing_recommendation"></span></p>
-            <p><strong>Final Price:</strong> <span id="final_price"></span></p>
-            <p><strong>Final Discount:</strong> <span id="final_discount"></span></p>
+<body class="bg-gradient-custom min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto max-w-4xl bg-glass-card rounded-xl shadow-2xl p-6 border border-white/20">
+        <!-- Header -->
+        <h1 class="text-4xl font-orbitron font-bold text-center text-yellow-400 mb-6 drop-shadow-lg animate-bounce-slow">Retail AI Dashboard</h1>
+
+        <!-- Input Section -->
+        <div class="mb-6 p-4 bg-white/10 rounded-xl shadow-lg">
+            <form id="inputForm" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label for="product_id" class="block text-white text-sm font-medium mb-2">Product ID:</label>
+                    <input type="number" name="product_id" id="product_id" value="9286" required class="w-full p-2 rounded-md bg-white/90 text-gray-800 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all duration-200">
+                </div>
+                <div>
+                    <label for="store_id" class="block text-white text-sm font-medium mb-2">Store ID:</label>
+                    <input type="number" name="store_id" id="store_id" value="16" required class="w-full p-2 rounded-md bg-white/90 text-gray-800 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all duration-200">
+                </div>
+                <div>
+                    <label for="forecast_horizon_days" class="block text-white text-sm font-medium mb-2">Forecast Horizon (days):</label>
+                    <input type="number" name="forecast_horizon_days" id="forecast_horizon_days" value="7" required class="w-full p-2 rounded-md bg-white/90 text-gray-800 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all duration-200">
+                </div>
+                <div class="flex items-end">
+                    <button type="submit" class="w-full bg-yellow-400 text-blue-900 font-bold py-2 px-4 rounded-md hover:bg-yellow-500 hover:scale-105 transition-transform duration-200 focus:outline-none focus:ring-2 focus:ring-yellow-400 animate-bounce-slow">Generate Insights</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results" class="space-y-4">
+            <div id="loading" class="hidden flex justify-center items-center">
+                <div id="loadingMessage" class="text-yellow-400 text-xl font-orbitron"></div>
+            </div>
+            <div id="demandCard" class="result-card hidden"></div>
+            <div id="inventoryCard" class="result-card hidden"></div>
+            <div id="orderCard" class="result-card hidden"></div>
+            <div id="pricingCard" class="result-card hidden"></div>
+            <div id="priceCard" class="result-card hidden"></div>
+            <div id="discountCard" class="result-card hidden"></div>
+            <div id="chartCard" class="result-card hidden">
+                <canvas id="forecastChart" class="w-full h-64 bg-white/20 rounded-lg p-2"></canvas>
+            </div>
+        </div>
+
+        <!-- Thinking Section -->
+        <div class="mt-6 p-4 bg-white/10 rounded-xl shadow-lg">
+            <div class="flex justify-between items-center mb-2">
+                <h2 class="text-2xl font-orbitron font-semibold text-yellow-400">Thinking Process</h2>
+                <button id="toggleThinking" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors duration-200 hover:scale-105">Toggle Details</button>
+            </div>
+            <div id="thinkingSection" class="hidden bg-gray-800 p-4 rounded-lg max-h-60 overflow-y-auto text-white text-sm transition-all duration-300">
+                <pre id="thinkingLog"></pre>
+            </div>
         </div>
     </div>
-    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <canvas id="demandChart" width="400" height="200"></canvas>
+
+    <script>
+        let loadingIndex = 0;
+        const loadingMessages = [
+            "Forecasting demand...",
+            "Getting the correct price and discount...",
+            "Making the best prompts for you to get the perfect output..."
+        ];
+
+        function updateLoadingMessage() {
+            const loadingMessage = document.getElementById('loadingMessage');
+            loadingMessage.textContent = loadingMessages[loadingIndex];
+            loadingIndex = (loadingIndex + 1) % loadingMessages.length;
+        }
+
+        document.getElementById('inputForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const results = document.getElementById('results').children;
+            for (let i = 0; i < results.length; i++) {
+                results[i].classList.add('hidden');
+            }
+            document.getElementById('loading').classList.remove('hidden');
+            loadingIndex = 0;
+            const loadingInterval = setInterval(updateLoadingMessage, 1000);
+
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            const response = await fetch('/process', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            clearInterval(loadingInterval);
+            const result = await response.json();
+            document.getElementById('loading').classList.add('hidden');
+
+            if (result.error) {
+                alert(result.error);
+            } else {
+                const cards = {
+                    'demandCard': `Demand Forecast: <span class="text-yellow-400">${result.demand_forecast}</span>`,
+                    'inventoryCard': `Inventory Status: <span class="text-yellow-400">${result.inventory_status}</span>`,
+                    'orderCard': `Order Quantity: <span class="text-yellow-400">${result.order_quantity}</span>`,
+                    'pricingCard': `Pricing Recommendation: <span class="text-yellow-400">${result.pricing_recommendation}</span>`,
+                    'priceCard': `Final Price: <span class="text-yellow-400">${result.final_price}</span>`,
+                    'discountCard': `Final Discount: <span class="text-yellow-400">${result.final_discount}</span>`
+                };
+
+                Object.entries(cards).forEach(([id, content]) => {
+                    const card = document.getElementById(id);
+                    card.innerHTML = content;
+                    card.classList.remove('hidden');
+                    card.classList.add('fade-in');
+                });
+
+                const ctx = document.getElementById('forecastChart').getContext('2d');
+                if (window.myChart) window.myChart.destroy();
+                window.myChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: Array(7).fill().map((_, i) => `Day ${i + 1}`),
+                        datasets: [{
+                            label: 'Predicted Daily Sales',
+                            data: result.forecast_data,
+                            borderColor: '#ffd700',
+                            backgroundColor: 'rgba(255, 215, 0, 0.2)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
+                        }, {
+                            label: 'Baseline Sales',
+                            data: Array(7).fill(result.forecast_data[0] * 0.8), // 80% of predicted for comparison
+                            borderColor: 'rgba(255, 255, 255, 0.5)',
+                            borderWidth: 1,
+                            fill: false,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { beginAtZero: true, ticks: { color: '#fff' }, grid: { color: 'rgba(255, 255, 255, 0.1)' } },
+                            x: { ticks: { color: '#fff' }, grid: { color: 'rgba(255, 255, 255, 0.1)' } }
+                        },
+                        plugins: { legend: { labels: { color: '#fff' } } }
+                    }
+                });
+                document.getElementById('chartCard').classList.remove('hidden');
+                document.getElementById('chartCard').classList.add('fade-in');
+
+                // Populate Thinking Section
+                const thinkingLog = document.getElementById('thinkingLog');
+                thinkingLog.textContent = result.thinking_log.join('\n');
+            }
+        });
+
+        document.getElementById('toggleThinking').addEventListener('click', () => {
+            const thinkingSection = document.getElementById('thinkingSection');
+            thinkingSection.classList.toggle('hidden');
+            if (!thinkingSection.classList.contains('hidden')) {
+                thinkingSection.classList.add('fade-in');
+            }
+        });
+    </script>
 </body>
 </html>
